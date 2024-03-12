@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import nl.tudelft.jpacman.board.Board;
 import nl.tudelft.jpacman.board.Direction;
@@ -264,14 +265,31 @@ public class Level {
      */
     private void updateObservers() {
         if (!isAnyPlayerAlive()) {
-            for (LevelObserver observer : observers) {
-                observer.levelLost();
-            }
+            notifyObserversLevelLost();
         }
         if (remainingPellets() == 0) {
-            for (LevelObserver observer : observers) {
-                observer.levelWon();
-            }
+            notifyObserversLevelWon();
+        }
+//        if (isAnyPlayerHit()) {
+//            notifyObserversLevelRespawn();
+//        }
+    }
+
+    private void notifyObserversLevelLost() {
+        notifyObservers(LevelObserver::levelLost);
+    }
+
+    private void notifyObserversLevelWon() {
+        notifyObservers(LevelObserver::levelWon);
+    }
+
+//    private void notifyObserversLevelRespawn() {
+//        notifyObservers(LevelObserver::levelRespawn);
+//    }
+
+    private void notifyObservers(Consumer<LevelObserver> action) {
+        for (LevelObserver observer : observers) {
+            action.accept(observer);
         }
     }
 
