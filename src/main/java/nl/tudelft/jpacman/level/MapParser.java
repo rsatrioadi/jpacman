@@ -123,9 +123,10 @@ public class MapParser {
             case 'G':
                 Square ghostSquare = makeGhostSquare(ghosts, levelCreator.createGhost());
                 grid[x][y] = ghostSquare;
+                startPositions.add(ghostSquare);
                 break;
             case 'P':
-                Square playerSquare = boardCreator.createGround();
+                Square playerSquare = boardCreator.createGround(Player.class);
                 grid[x][y] = playerSquare;
                 startPositions.add(playerSquare);
                 break;
@@ -144,7 +145,7 @@ public class MapParser {
      * @return a square with the ghost on it.
      */
     protected Square makeGhostSquare(List<Ghost> ghosts, Ghost ghost) {
-        Square ghostSquare = boardCreator.createGround();
+        Square ghostSquare = boardCreator.createGround(Ghost.class);
         ghosts.add(ghost);
         ghost.occupy(ghostSquare);
         return ghostSquare;

@@ -20,6 +20,16 @@ public class Player extends Unit {
     private int score;
 
     /**
+     * The amount of health the player has.
+     */
+    private int health;
+
+    /**
+     * True if the player has been hit, False otherwise.
+     */
+    private boolean isHit;
+
+    /**
      * The animations for every direction.
      */
     private final Map<Direction, Sprite> sprites;
@@ -49,6 +59,7 @@ public class Player extends Unit {
      */
     protected Player(Map<Direction, Sprite> spriteMap, AnimatedSprite deathAnimation) {
         this.score = 0;
+        this.health = 3;
         this.alive = true;
         this.sprites = spriteMap;
         this.deathSprite = deathAnimation;
@@ -83,6 +94,9 @@ public class Player extends Unit {
         this.alive = isAlive;
     }
 
+    public void setHit(boolean isHit) {
+        this.isHit = isHit;
+    }
     /**
      * Returns the unit that caused the death of Pac-Man.
      *
@@ -110,6 +124,14 @@ public class Player extends Unit {
         return score;
     }
 
+    public int getHealth() {
+        return health;
+    }
+
+    public boolean isHit() {
+        return isHit;
+    }
+
     @Override
     public Sprite getSprite() {
         if (isAlive()) {
@@ -127,5 +149,19 @@ public class Player extends Unit {
      */
     public void addPoints(int points) {
         score += points;
+    }
+
+    /**
+     * Adds damages to the health of this player.
+     *
+     * @param damages
+     *            The amount of damages to remove from the health this player has.
+     */
+    public void takeDamage(int damages) {
+        health -= damages;
+        this.setHit(true);
+        if (health == 0) {
+            this.setAlive(false);
+        }
     }
 }
