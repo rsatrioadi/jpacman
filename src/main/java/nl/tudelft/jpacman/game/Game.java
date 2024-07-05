@@ -71,6 +71,16 @@ public abstract class Game implements LevelObserver {
         }
     }
 
+    public void respawn() {
+        synchronized (progressLock) {
+            if (!isInProgress()) {
+                return;
+            }
+            inProgress = true;
+            getLevel().respawn();
+        }
+    }
+
     /**
      * @return <code>true</code> iff the game is started and in progress.
      */
@@ -112,5 +122,9 @@ public abstract class Game implements LevelObserver {
     @Override
     public void levelLost() {
         stop();
+    }
+
+    public void levelRespawn() {
+        respawn();
     }
 }

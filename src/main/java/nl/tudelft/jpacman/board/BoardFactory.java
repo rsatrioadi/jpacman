@@ -63,9 +63,12 @@ public class BoardFactory {
      * @return A new square that can be occupied by any unit.
      */
     public Square createGround() {
-        return new Ground(sprites.getGroundSprite());
+        return new Ground(sprites.getGroundSprite(), null);
     }
 
+    public Square createGround(Class<? extends Unit> clsType) {
+        return new Ground(sprites.getGroundSprite(), clsType);
+    }
     /**
      * Creates a new square that cannot be occupied by any unit.
      *
@@ -126,8 +129,9 @@ public class BoardFactory {
          * @param sprite
          *            The background for the square.
          */
-        Ground(Sprite sprite) {
+        Ground(Sprite sprite, Class<? extends Unit> spawnClass) {
             this.background = sprite;
+            this.spawnType = spawnClass;
         }
 
         @Override

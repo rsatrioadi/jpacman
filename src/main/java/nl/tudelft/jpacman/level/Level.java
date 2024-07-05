@@ -1,15 +1,11 @@
 package nl.tudelft.jpacman.level;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import nl.tudelft.jpacman.board.Board;
 import nl.tudelft.jpacman.board.Direction;
@@ -146,6 +142,10 @@ public class Level {
         }
         players.add(player);
         Square square = startSquares.get(startSquareIndex);
+        while (!square.getSpawnType().equals(Player.class)){
+            square = startSquares.get(startSquareIndex);
+            startSquareIndex++;
+        }
         player.occupy(square);
         startSquareIndex++;
         startSquareIndex %= startSquares.size();
@@ -213,6 +213,24 @@ public class Level {
      * Stops or pauses this level, no longer allowing any movement on the board
      * and stopping all NPCs.
      */
+    public void respawn(){
+        int i = 0;
+        Iterator<Ghost> ghostIterator = this.npcs.keySet().iterator();
+
+        for (Square square : startSquares) {
+            if (square.getSpawnType().equals(Player.class)) {
+                this.players.get(i).occupy(square);
+                i += 1;
+            } else if (square.getSpawnType().equals(Ghost.class)) {
+                ghostIterator.next().occupy(square);
+            }
+        }
+    }
+
+    /**
+     * Stops or pauses this level, no longer allowing any movement on the board
+     * and stopping all NPCs.
+     */
     public void stop() {
         synchronized (startStopLock) {
             if (!isInProgress()) {
@@ -266,14 +284,31 @@ public class Level {
         Iterable<LevelObserver> observers = new ArrayList<>(this.observers);
 
         if (!isAnyPlayerAlive()) {
-            for (LevelObserver observer : observers) {
-                observer.levelLost();
-            }
+            notifyObserversLevelLost();
         }
         if (remainingPellets() == 0) {
-            for (LevelObserver observer : observers) {
-                observer.levelWon();
-            }
+            notifyObserversLevelWon();
+        }
+        if (isAnyPlayerHit()) {
+            notifyObserversLevelRespawn();
+        }
+    }
+
+    private void notifyObserversLevelLost() {
+        notifyObservers(LevelObserver::levelLost);
+    }
+
+    private void notifyObserversLevelWon() {
+        notifyObservers(LevelObserver::levelWon);
+    }
+
+    private void notifyObserversLevelRespawn() {
+        notifyObservers(LevelObserver::levelRespawn);
+    }
+
+    private void notifyObservers(Consumer<LevelObserver> action) {
+        for (LevelObserver observer : observers) {
+            action.accept(observer);
         }
     }
 
@@ -287,6 +322,23 @@ public class Level {
     public boolean isAnyPlayerAlive() {
         for (Player player : players) {
             if (player.isAlive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns <code>true</code> iff at least one of the players in this level
+     * is alive.
+     *
+     * @return <code>true</code> if at least one of the registered players is
+     *         alive.
+     */
+    public boolean isAnyPlayerHit() {
+        for (Player player : players) {
+            if (player.isHit()) {
+                player.setHit(false);
                 return true;
             }
         }
@@ -373,5 +425,7 @@ public class Level {
          * this event is received.
          */
         void levelLost();
+
+        void levelRespawn();
     }
 }

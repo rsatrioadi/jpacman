@@ -16,6 +16,8 @@ import nl.tudelft.jpacman.sprite.Sprite;
  */
 public abstract class Square {
 
+    protected Class<? extends Unit> spawnType;
+
     /**
      * The units occupying this square, in order of appearance.
      */
@@ -32,6 +34,7 @@ public abstract class Square {
     protected Square() {
         this.occupants = new ArrayList<>();
         this.neighbours = new EnumMap<>(Direction.class);
+        this.spawnType = null;
         assert invariant();
     }
 
@@ -69,6 +72,10 @@ public abstract class Square {
      */
     public List<Unit> getOccupants() {
         return ImmutableList.copyOf(occupants);
+    }
+
+    public Class<? extends Unit> getSpawnType() {
+        return spawnType;
     }
 
     /**
@@ -126,5 +133,4 @@ public abstract class Square {
      * @return The sprite of this square.
      */
     public abstract Sprite getSprite();
-
 }
